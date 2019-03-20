@@ -50,11 +50,17 @@ var customerInfo = mongoose.Schema({
     city: String
 });
 
+
+var user = mongoose.Schema({
+    username: String,
+    password: String
+})
 module.exports = {
     mongoose,
     insuranceProvider,
     customerInfo,
     providerLoginInfo,
-    insuranceInformation
+    insuranceInformation,
+    user
 };
 

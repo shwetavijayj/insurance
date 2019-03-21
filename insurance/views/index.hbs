@@ -1,4 +1,6 @@
-<h1>{{title}}</h1>
-<p>Welcome to {{title}}</p>
-
-View your <a href="/profile">profile</a>
+<% if (!user) { %>
+<h2>Welcome! Please log in.</h2>
+<% } else { %>
+<h2>Hello,
+    <%= user.displayName %>.</h2>
+<% } %>

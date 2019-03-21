@@ -52,8 +52,8 @@ var customerInfo = mongoose.Schema({
 
 
 var user = mongoose.Schema({
-    username: String,
-    password: String
+    name: String,
+    id: String
 })
 module.exports = {
     mongoose,

@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -23,13 +24,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+//passport setup
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-//passport setup
-
-
+//passport setup for success and fail
 app.get('/', (req, res) => res.send("Welcome " + req.query.username + "!!"));
 app.get('/error', (req, res) => res.send("error logging in"));
 

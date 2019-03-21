@@ -1,18 +1,9 @@
 var express = require('express');
 var router = express.Router();
-const passport = require('passport');
-const myPassport = require('../controller/passport')
-router.use(passport.initialize());
-router.use(passport.session());
-
+var passport = require('passport');
 var GitHubStrategy = require('passport-github2').Strategy;
-const LocalStrategy = require('passport-local').Strategy;
-// passport.use(new LocalStrategy(
-//   myPassport.test
-// ));
-/* GET home page. */
-
-
+var GITHUB_CLIENT_ID = "d9f5f8c83b49b02de89b";
+var GITHUB_CLIENT_SECRET = "cdf343e52c29b304872802c7a6a075d351efdc5e";
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -23,53 +14,58 @@ passport.deserializeUser(function (obj, done) {
 });
 
 passport.use(new GitHubStrategy({
-  clientID: 'd9f5f8c83b49b02de89b',
-  clientSecret: 'cdf343e52c29b304872802c7a6a075d351efdc5e',
-  callbackURL: "/"
+  clientID: GITHUB_CLIENT_ID,
+  clientSecret: GITHUB_CLIENT_SECRET,
+  callbackURL: "http://127.0.0.1:3000/auth/github/callback"
 },
-  function (accessToken, refreshToken, profile, cb) {
-    return cb(null, profile);
-  }));
+  function (accessToken, refreshToken, profile, done) {
+    // asynchronous verification, for effect...
+    process.nextTick(function () {
 
-//login using passport-custom authentication
-// router.post('/',
-//   passport.authenticate('local', { failureRedirect: '/error' }),
-//   function (req, res) {
-//     // res.redirect('/' + req.user.username);
-//     console.log("Success");
-//   });
-
-router.get('/', (req, res) => {
-  res.render('page1');
-})
-
-//login using passport-github authentication
-router.post('/login',
-  passport.authenticate('github', { failureRedirect: '/' }),
-  function (req, res) {
-    console.log("Success for github login");
+      // To keep the example simple, the user's GitHub profile is returned to
+      // represent the logged-in user.  In a typical application, you would want
+      // to associate the GitHub account with a user record in your database,
+      // and return that user instead.
+      return done(null, profile);
+    });
   }
-);
+));
 
-app.get('/auth/github/callback',
+router.get('/', function (req, res) {
+  res.render('index');
+});
+
+router.get('/login', function (req, res) {
+  res.render('login', { user: req.user });
+});
+
+router.get('/account', ensureAuthenticated, function (req, res) {
+  res.render('page1');
+});
+
+router.get('/auth/github',
+  passport.authenticate('github', { scope: ['user:email'] }),
+  function (req, res) {
+    // The request will be redirected to GitHub for authentication, so this
+    // function will not be called.
+  });
+
+router.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   function (req, res) {
     res.redirect('/');
   });
 
-router.get('/',
-  passport.authenticate('github', { failureRedirect: '/error' }),
-  function (req, res) {
-    res.redirect('/');
-  });
-
-router.get('/login', (req, res) => {
-  res.render('index')
+router.get('/logout', function (req, res) {
+  req.logout();
+  res.redirect('/');
 });
 
-router.get('/profile',
-  require('connect-ensure-login').ensureLoggedIn('/'),
-  function (req, res) {
-    res.render('profile', { user: req.user });
-  });
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+}
+
+
+
 module.exports = router;
